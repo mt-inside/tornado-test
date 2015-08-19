@@ -10,8 +10,18 @@ class IndexHandler(tornado.web.RequestHandler):
 
 class ThingHandler(tornado.web.RequestHandler):
     def get(self, parent_id, child_id):
-        self.write("Hello, %s, you're interested in %s!\n" % (parent_id, child_id))
-        self.write("And you gave the 'hello' argument as %s\n" % self.get_argument("hello"))
+        def lst(parent_id):
+            self.write("Hello, %s, you're interested in ALL!\n" % (parent_id,))
+            self.write("And you gave the 'hello' argument as %s\n" % self.get_argument("hello"))
+
+        def show(parent_id, child_id):
+            self.write("Hello, %s, you're interested in %s!\n" % (parent_id, child_id))
+            self.write("And you gave the 'hello' argument as %s\n" % self.get_argument("hello"))
+
+        if child_id == "":
+            lst(parent_id)
+        else:
+            show(parent_id, child_id)
 
     def post(self, parent_id, child_id):
         self.write("Hello, %s, you're interested in %s!\n" % (parent_id, child_id))
