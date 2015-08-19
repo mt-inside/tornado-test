@@ -28,6 +28,14 @@ class ThingHandler(tornado.web.RequestHandler):
         data = json.loads(self.request.body.decode('utf-8'))
         self.write("And you have the 'hello' datum as %s\n" % data['hello'])
 
+    def delete(self, parent_id, child_id):
+        d = dict(status="ok", remaining=1)
+        d.update({x : x*2 for x in (1,2,3)})
+        # Rendering to JSON seems to be automatic for compound types, including
+        #   setting correct response MIME type
+        # Outer object must be a dict
+        self.write(d)
+
 
 application = tornado.web.Application([
     (r"/", IndexHandler),
