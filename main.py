@@ -8,7 +8,7 @@ class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("Hello, world!")
 
-class ThingHandler(tornado.web.RequestHandler):
+class ThingHandlerInt(tornado.web.RequestHandler):
     def get(self, parent_id, child_id):
         def lst(parent_id):
             self.write("Hello, %s, you're interested in ALL!\n" % (parent_id,))
@@ -18,15 +18,16 @@ class ThingHandler(tornado.web.RequestHandler):
             self.write("Hello, %s, you're interested in %s!\n" % (parent_id, child_id))
             self.write("And you gave the 'hello' argument as %s\n" % self.get_argument("hello"))
 
-        if child_id == "":
+        if child_id is None:
             lst(parent_id)
         else:
             show(parent_id, child_id)
 
     def post(self, parent_id, child_id):
-        self.write("Hello, %s, you're interested in %s!\n" % (parent_id, child_id))
+        assert(child_id == "")
+        self.write("Hello, %s, you're interested in making a new child!\n" % (parent_id,))
         data = json.loads(self.request.body.decode('utf-8'))
-        self.write("And you have the 'hello' datum as %s\n" % data['hello'])
+        self.write("You have the 'hello' datum as %s\n" % data['hello'])
 
     def delete(self, parent_id, child_id):
         d = dict(status="ok", remaining=1)
@@ -36,10 +37,17 @@ class ThingHandler(tornado.web.RequestHandler):
         # Outer object must be a dict
         self.write(d)
 
+class ThingHandlerStr(tornado.web.RequestHandler):
+    def get(self, parent_id, child_id):
+        self.write("Requested by string ID %s\n" % (parent_id,))
+
 
 application = tornado.web.Application([
     (r"/", IndexHandler),
-    (r"/v1/parent/([0-9]*)/child/?([0-9]*)", ThingHandler),
+    # Making the last group optional passes None as that arg if it's not matched
+    # Alternatively could rewrite as [0-9]*, in which case there being no element will give ""
+    (r"/v1/parent/([0-9]*)/child/?([0-9]+)?", ThingHandlerInt),
+    (r"/v1/parent/([a-z]*)/child/?([0-9]+)?", ThingHandlerStr),
 ])
 
 if __name__ == "__main__":
